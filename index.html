@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 10%;
+        }
+        input {
+            padding: 10px;
+            margin: 10px;
+            width: 200px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background-color: #1db954;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #17a74a;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Attendance Calculator</h1>
+        <input type="number" id="attended" placeholder="Lectures Attended">
+        <input type="number" id="total" placeholder="Total Lectures">
+        <br>
+        <button onclick="calculateAttendance()">Calculate</button>
+        <div class="result" id="result"></div>
+        <div id="targetSection" style="display: none;">
+            <input type="number" id="target" placeholder="Target Percentage">
+            <br>
+            <button onclick="calculateRequiredLectures()">Calculate Required Lectures</button>
+            <div class="result" id="targetResult"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAttendance() {
+            let attended = parseInt(document.getElementById("attended").value);
+            let total = parseInt(document.getElementById("total").value);
+            
+            if (isNaN(attended) || isNaN(total) || total <= 0 || attended < 0 || attended > total) {
+                document.getElementById("result").innerHTML = "Please enter valid numbers";
+                return;
+            }
+            
+            let percentage = (attended / total) * 100;
+            document.getElementById("result").innerHTML = `Current Attendance: ${percentage.toFixed(2)}%`;
+            document.getElementById("targetSection").style.display = "block";
+        }
+
+        function calculateRequiredLectures() {
+            let attended = parseInt(document.getElementById("attended").value);
+            let total = parseInt(document.getElementById("total").value);
+            let target = parseFloat(document.getElementById("target").value);
+            
+            if (isNaN(target) || target <= 0 || target > 100) {
+                document.getElementById("targetResult").innerHTML = "Please enter a valid target percentage (0-100)";
+                return;
+            }
+            
+            // Calculate current percentage
+            let currentPercentage = (attended / total) * 100;
+            
+            // If target is already achieved
+            if (currentPercentage >= target) {
+                document.getElementById("targetResult").innerHTML = "You have already achieved your target attendance!";
+                return;
+            }
+            
+            // Calculate required lectures using the correct formula
+            let requiredLectures = Math.ceil(((target - currentPercentage)*total)/100);
+            
+            // Display the result
+            document.getElementById("targetResult").innerHTML = `You need to attend ${requiredLectures} more lectures to reach ${target}% attendance.`;
+        }
+    </script>
+</body>
+</html>
