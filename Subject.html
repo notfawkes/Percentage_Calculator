@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject-wise Attendance Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="index.html">Calculate Overall Percentage</a>
+    </div>
+
+    <div class="container-box">
+        <div class="container">
+            <h1>Subject-wise Attendance</h1>
+            <input type="number" id="numSubjects" placeholder="Enter number of subjects">
+            <button onclick="generateSubjects()">Generate</button>
+            <div id="subjectsContainer"></div>
+            <button onclick="calculateOverallAttendance()" style="display: none;" id="calculateOverall">Calculate Overall Attendance</button>
+            <div id="overallResult"></div>
+            <div class="chart-container">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let attendanceChart;
+        function generateSubjects() {
+            let numSubjects = parseInt(document.getElementById("numSubjects").value);
+            let subjectsContainer = document.getElementById("subjectsContainer");
+            subjectsContainer.innerHTML = "";
+            if (isNaN(numSubjects) || numSubjects <= 0) {
+                subjectsContainer.innerHTML = "<p style='color: white; text-align: center;'>Enter a valid number of subjects.</p>";
+                return;
+            }
+            for (let i = 1; i <= numSubjects; i++) {
+                let subjectDiv = document.createElement("div");
+                subjectDiv.className = "subject-box";
+                subjectDiv.innerHTML = `
+                    <input type="text" placeholder="Enter Subject Name" class="subject-name">
+                    <input type="number" placeholder="Lectures Attended" class="attended">
+                    <input type="number" placeholder="Total Lectures" class="total">
+                    <button onclick="calculateSubjectAttendance(this)">Calculate</button>
+                    <div class="attendance-result"></div>
+                `;
+                subjectsContainer.appendChild(subjectDiv);
+            }
+            document.getElementById("calculateOverall").style.display = "block";
+        }
+        
+        function calculateSubjectAttendance(button) {
+            let subjectBox = button.parentElement;
+            let attended = parseInt(subjectBox.querySelector(".attended").value);
+            let total = parseInt(subjectBox.querySelector(".total").value);
+            let resultDiv = subjectBox.querySelector(".attendance-result");
+            if (isNaN(attended) || isNaN(total) || total <= 0 || attended < 0 || attended > total) {
+                resultDiv.innerHTML = "<span style='color: red;'>Invalid input!</span>";
+                return;
+            }
+            let percentage = (attended / total) * 100;
+            resultDiv.innerHTML = `Attendance: ${percentage.toFixed(2)}%`;
+            calculateOverallAttendance();
+        }
+        
+        function calculateOverallAttendance() {
+            let subjectBoxes = document.querySelectorAll(".subject-box");
+            let totalAttended = 0, totalClasses = 0;
+            let labels = [], data = [];
+            subjectBoxes.forEach(subjectBox => {
+                let subjectName = subjectBox.querySelector(".subject-name").value || "Unnamed";
+                let attended = parseInt(subjectBox.querySelector(".attended").value);
+                let total = parseInt(subjectBox.querySelector(".total").value);
+                if (!isNaN(attended) && !isNaN(total) && total > 0 && attended >= 0 && attended <= total) {
+                    totalAttended += attended;
+                    totalClasses += total;
+                    labels.push(subjectName);
+                    data.push(((attended / total) * 100).toFixed(2));
+                }
+            });
+            let overallPercentage = (totalAttended / totalClasses) * 100;
+            document.getElementById("overallResult").innerHTML = `Overall Attendance: ${overallPercentage.toFixed(2)}%`;
+            updateGraph(labels, data);
+        }
+        
+        function updateGraph(labels, data) {
+            let ctx = document.getElementById("attendanceChart").getContext("2d");
+            if (attendanceChart) attendanceChart.destroy();
+            attendanceChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Attendance %",
+                        data: data,
+                        backgroundColor: "rgba(29, 185, 84, 0.8)",
+                        borderColor: "rgba(29, 185, 84, 1)",
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
